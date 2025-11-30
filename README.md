@@ -11,7 +11,7 @@ A minimal, blazing-fast TUI countdown timer and stopwatch for the terminal. Buil
 - ⏸️ **Pause/Resume** - Pause and resume timers with spacebar
 - 🎨 **Color Indicators** - Visual feedback (red warning <5min, blue when paused)
 - ⚡ **Low Resource Usage** - Optimized adaptive ticker intervals
-- ⌨️ **Simple Controls** - Intuitive keyboard shortcuts
+- ⌨️ **Simple Controls** - Intuitive keyboard shortcuts (pause, quit, etc.)
 
 ## 🚀 Installation
 
@@ -54,7 +54,7 @@ timer 1h
 timer -i 30s
 
 # Named timer (shows name in notification)
-timer -name "Pomodoro Session" 25m
+timer -session "Pomodoro Session" 25m
 
 # Display version
 timer -version
@@ -72,36 +72,37 @@ timer -version
 |------|-----------|-------------|
 | `--inline` | `-i` | Run in inline mode (disable fullscreen TUI) |
 | `--version` | `-v` | Display version information |
-| `--name` | | Name for the timer (shown in notifications) |
+| `--session` | | Name for the timer (shown in notifications, used for session key) |
 | `--paused` | `-p` | Start timer in paused state |
 
-### Configuration File
+### Configuration File & Sessions
 
-Timer supports optional configuration via a JSON file located at `~/.config/go-timer/config.json`. This allows customization of display settings, timing intervals, and other parameters.
+Timer supports optional configuration via a JSON file located at `~/.config/go-timer/config.json`. This allows customization of display settings, timing intervals, and other parameters. Timer also persists sessions in `sessions.json` (auto-created), which can be restored with `--restore` / `-r` or via auto-restore when enabled.
 
-#### Config File Format
+#### Config File Format (Go-style durations, comments here for docs only)
 
 ```json
 {
-  "tickIntervalFast": 100, // ms
-  "tickIntervalMedium": 500, // ms
-  "tickIntervalSlow": 1000, // ms
-  "warningThreshold": 50000, // ms
+  "tickIntervalFast": "100ms",
+  "tickIntervalMedium": "500ms",
+  "tickIntervalSlow": "1s",
+  "warningThreshold": "5m",
   "glyphWidth": 8,
   "glyphHeight": 7,
   "glyphSpacing": 1,
   "keyBufferSize": 10,
   "defaultTermWidth": 80,
-  "defaultTermHeight": 24
+  "defaultTermHeight": 24,
+  "restore": false
 }
 ```
 
 #### Configuration Options
 
-- `tickIntervalFast` (int): Update interval for timers < 1 minute (default: 100, range: 10-1000)
-- `tickIntervalMedium` (int): Update interval for timers 1-10 minutes (default: 500, range: 10-1000)
-- `tickIntervalSlow` (string): Update interval for timers > 10 minutes (default: "1s", range: 10ms-5s)
-- `warningThreshold` (string): Time remaining when warning color activates (default: "5m", range: 1m-1h)
+- `tickIntervalFast` (duration): Update interval for timers < 1 minute (default: 100ms, range: 10ms-1s)
+- `tickIntervalMedium` (duration): Update interval for timers 1-10 minutes (default: 500ms, range: 10ms-1s)
+- `tickIntervalSlow` (duration): Update interval for timers > 10 minutes (default: 1s, range: 10ms-5s)
+- `warningThreshold` (duration): Time remaining when warning color activates (default: 5m, range: 1m-1h)
 - `glyphWidth` (int): Width of each ASCII character in display (default: 8, range: 1-20)
 - `glyphHeight` (int): Height of each ASCII character in display (default: 7, range: 1-20)
 - `glyphSpacing` (int): Spacing between characters (default: 1, range: 0-5)
@@ -117,16 +118,18 @@ Timer supports optional configuration via a JSON file located at `~/.config/go-t
 - Duration values use Go's time.ParseDuration format (e.g., "100ms", "5m", "1h")
 - Invalid or missing config values fall back to defaults
 - Config values outside acceptable ranges are ignored to prevent performance issues
-- When `restore` is true and no duration is provided, timer automatically restores the last session with its original display mode (inline or fullscreen)
+- When `restore` is true and no duration is provided (and `--restore` not disabled), timer automatically restores the last session with its original display mode (inline or fullscreen)
 - Command-line flags take precedence over restored session settings, allowing users to override saved behavior when restoring
 
-## ⌨️ Keyboard Controls
+## ⌨️ Keyboard Controls & Notifications
 
 | Key | Action |
 |-----|--------|
 | <kbd>Space</kbd> | Pause/Resume timer |
 | <kbd>q</kbd> / <kbd>Q</kbd> / <kbd>ESC</kbd> | Quit |
 | <kbd>Ctrl</kbd>+<kbd>C</kbd> | Force quit |
+
+On Linux, when a countdown finishes, the app triggers a `notify-send` desktop notification (if available), using the timer name as the title when set.
 
 ## 🎨 Visual Indicators
 

@@ -67,12 +67,24 @@ func getTickerInterval(duration time.Duration) time.Duration {
 }
 
 func writeSession(session Session) {
-	data, err := json.MarshalIndent(session, "", "  ")
-	if err != nil {
-		// Silently ignore write errors to not disrupt the timer
+	key := session.Name
+	if key == "" {
+		key = "default"
+	}
+	data, err := os.ReadFile("sessions.json")
+	if err != nil && !os.IsNotExist(err) {
 		return
 	}
-	_ = os.WriteFile("sessions.json", data, 0644)
+	sessions := make(map[string]Session)
+	if err == nil {
+		_ = json.Unmarshal(data, &sessions)
+	}
+	sessions[key] = session
+	out, err := json.MarshalIndent(sessions, "", "  ")
+	if err != nil {
+		return
+	}
+	_ = os.WriteFile("sessions.json", out, 0644)
 }
 
 func runTimer(duration time.Duration, useFullscreen bool, initialPaused bool, name string, initialElapsed time.Duration, summaryCh chan<- TimerSummary) error {

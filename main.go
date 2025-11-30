@@ -15,7 +15,7 @@ var (
 	showVersionS = flag.Bool("v", false, "display version information (shorthand for -version)")
 	pausedMode   = flag.Bool("paused", false, "start timer in paused state")
 	pausedModeS  = flag.Bool("p", false, "start timer in paused state (shorthand for -paused)")
-	timerName    = flag.String("name", "", "name for the timer")
+	timerName    = flag.String("session", "", "name for the timer")
 	restoreMode  = flag.Bool("restore", false, "restore timer from sessions.json")
 	restoreModeS = flag.Bool("r", false, "restore timer from sessions.json (shorthand)")
 )
@@ -33,9 +33,10 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "  timer 2m                 # 2 minutes countdown (fullscreen)\n")
 	fmt.Fprintf(os.Stderr, "  timer -i 30s             # inline mode countdown\n")
 	fmt.Fprintf(os.Stderr, "  timer -p 5m              # 5 minutes countdown starting paused\n")
-	fmt.Fprintf(os.Stderr, "  timer -name \"Pomodoro\" 25m  # named timer with notification\n")
-	fmt.Fprintf(os.Stderr, "  timer --restore          # restore timer from sessions.json\n")
-	fmt.Fprintf(os.Stderr, "  timer --restore -i       # restore in inline mode regardless of saved setting\n")
+	fmt.Fprintf(os.Stderr, "  timer -session \"Pomodoro\" 25m  # named timer with notification\n")
+	fmt.Fprintf(os.Stderr, "  timer --restore                # restore \"default\" session from sessions.json\n")
+	fmt.Fprintf(os.Stderr, "  timer --restore --session NAME    # restore session named NAME\n")
+	fmt.Fprintf(os.Stderr, "  timer --restore -i             # restore in inline mode regardless of saved setting\n")
 }
 
 func main() {
@@ -105,7 +106,7 @@ func main() {
 	var initialElapsed time.Duration
 	if isRestore {
 		var err error
-		restoredSession, err = loadSession()
+		restoredSession, err = loadSession(*timerName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)

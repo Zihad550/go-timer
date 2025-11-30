@@ -55,15 +55,21 @@ func parseFormattedDuration(s string) time.Duration {
 	return time.Duration(sec * float64(time.Second))
 }
 
-func loadSession() (Session, error) {
+func loadSession(name string) (Session, error) {
+	if name == "" {
+		name = "default"
+	}
 	data, err := os.ReadFile("sessions.json")
 	if err != nil {
 		return Session{}, fmt.Errorf("failed to read sessions.json: %w", err)
 	}
-	var session Session
-	err = json.Unmarshal(data, &session)
-	if err != nil {
+	var sessions map[string]Session
+	if err := json.Unmarshal(data, &sessions); err != nil {
 		return Session{}, fmt.Errorf("failed to parse sessions.json: %w", err)
+	}
+	session, ok := sessions[name]
+	if !ok {
+		return Session{}, fmt.Errorf("session %q not found", name)
 	}
 	return session, nil
 }
