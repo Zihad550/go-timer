@@ -77,6 +77,19 @@ func withTempDir(t *testing.T, fn func(dir string)) {
 	fn(dir)
 }
 
+func createTestConfigDir(t *testing.T) string {
+	t.Helper()
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		t.Fatalf("UserConfigDir: %v", err)
+	}
+	testConfigDir := filepath.Join(configDir, "go-timer")
+	if err := os.MkdirAll(testConfigDir, 0755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	return testConfigDir
+}
+
 func TestLoadSession(t *testing.T) {
 	withTempDir(t, func(dir string) {
 		cwd, err := os.Getwd()
@@ -87,6 +100,9 @@ func TestLoadSession(t *testing.T) {
 		if err := os.Chdir(dir); err != nil {
 			t.Fatalf("Chdir: %v", err)
 		}
+
+		testConfigDir := createTestConfigDir(t)
+		sessionsPath := filepath.Join(testConfigDir, "sessions.json")
 
 		sessions := map[string]Session{
 			"default": {
@@ -114,7 +130,7 @@ func TestLoadSession(t *testing.T) {
 		if err != nil {
 			t.Fatalf("marshal: %v", err)
 		}
-		if err := os.WriteFile("sessions.json", data, 0644); err != nil {
+		if err := os.WriteFile(sessionsPath, data, 0644); err != nil {
 			t.Fatalf("write sessions.json: %v", err)
 		}
 
@@ -177,8 +193,10 @@ func resetGlobals() {
 	keyBufferSize = 10
 	defaultTermWidth = 80
 	defaultTermHeight = 24
-	restoreEnabled = false
+	restoreEnabled = true
 }
+
+func boolPtr(b bool) *bool { return &b }
 
 func TestLoadConfigValid(t *testing.T) {
 	defer resetGlobals()
@@ -198,7 +216,7 @@ func TestLoadConfigValid(t *testing.T) {
 			KeyBufferSize:      20,
 			DefaultTermWidth:   100,
 			DefaultTermHeight:  40,
-			Restore:            true,
+			Restore:            boolPtr(true),
 		}
 		b, err := json.Marshal(cfg)
 		if err != nil {

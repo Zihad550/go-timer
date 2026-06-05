@@ -16,8 +16,12 @@ var (
 	pausedMode   = flag.Bool("paused", false, "start timer in paused state")
 	pausedModeS  = flag.Bool("p", false, "start timer in paused state (shorthand for -paused)")
 	timerName    = flag.String("session", "", "name for the timer")
+	timerNameS   = flag.String("s", "", "name for the timer (shorthand for -session)")
 	restoreMode  = flag.Bool("restore", false, "restore timer from sessions.json")
 	restoreModeS = flag.Bool("r", false, "restore timer from sessions.json (shorthand)")
+	uiMode       = flag.Bool("ui", false, "open UI for managing sessions")
+	uiModeS      = flag.Bool("u", false, "open UI for managing sessions (shorthand)")
+	showSessions = flag.Bool("sessions", false, "list all sessions")
 )
 
 func usage() {
@@ -27,6 +31,9 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "          If omitted, runs as a counter (stopwatch) counting up from 00:00.\n\n")
 	fmt.Fprintf(os.Stderr, "Options:\n")
 	flag.PrintDefaults()
+	fmt.Fprintf(os.Stderr, "  -ui, -u       open UI for managing sessions\n")
+	fmt.Fprintf(os.Stderr, "  -session, -s  name for the timer\n")
+	fmt.Fprintf(os.Stderr, "  -sessions     list all sessions\n")
 	fmt.Fprintf(os.Stderr, "\nExamples:\n")
 	fmt.Fprintf(os.Stderr, "  timer                    # counter/stopwatch (counts up)\n")
 	fmt.Fprintf(os.Stderr, "  timer 5                  # 5 seconds countdown (fullscreen)\n")
@@ -34,17 +41,31 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "  timer -i 30s             # inline mode countdown\n")
 	fmt.Fprintf(os.Stderr, "  timer -p 5m              # 5 minutes countdown starting paused\n")
 	fmt.Fprintf(os.Stderr, "  timer -session \"Pomodoro\" 25m  # named timer with notification\n")
+	fmt.Fprintf(os.Stderr, "  timer -s \"Pomodoro\" 25m              # named timer with notification (shorthand)\n")
 	fmt.Fprintf(os.Stderr, "  timer --restore                # restore \"default\" session from sessions.json\n")
 	fmt.Fprintf(os.Stderr, "  timer --restore --session NAME    # restore session named NAME\n")
+	fmt.Fprintf(os.Stderr, "  timer --restore -s NAME             # restore session named NAME\n")
 	fmt.Fprintf(os.Stderr, "  timer --restore -i             # restore in inline mode regardless of saved setting\n")
+	fmt.Fprintf(os.Stderr, "  timer -sessions                # list all saved sessions\n")
 }
 
 func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	// Merge short/long flags for session name
+	if *timerNameS != "" {
+		*timerName = *timerNameS
+	}
+
 	// Load configuration from ~/.config/go-timer/config.json
 	loadConfig()
+
+	// Handle sessions list
+	if *showSessions {
+		printSessions()
+		return
+	}
 
 	// Get args after initial flag parse
 	args := flag.Args()
@@ -71,6 +92,12 @@ func main() {
 	// Handle version
 	if *showVersion || *showVersionS {
 		fmt.Println("timer version", version)
+		return
+	}
+
+	// Handle UI mode
+	if *uiMode || *uiModeS {
+		runUI()
 		return
 	}
 
@@ -114,6 +141,7 @@ func main() {
 		// Override parameters from session
 		if restoredSession.Mode == "counter" {
 			duration = 0
+			initialElapsed = parseFormattedDuration(restoredSession.Elapsed)
 		} else {
 			elapsed := parseFormattedDuration(restoredSession.Elapsed)
 			remaining := parseFormattedDuration(restoredSession.Remaining)

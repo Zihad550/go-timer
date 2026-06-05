@@ -56,6 +56,9 @@ timer -i 30s
 # Named timer (shows name in notification)
 timer -session "Pomodoro Session" 25m
 
+# Named timer with shorthand
+timer -s "Pomodoro Session" 25m
+
 # Display version
 timer -version
 ```
@@ -72,12 +75,13 @@ timer -version
 |------|-----------|-------------|
 | `--inline` | `-i` | Run in inline mode (disable fullscreen TUI) |
 | `--version` | `-v` | Display version information |
-| `--session` | | Name for the timer (shown in notifications, used for session key) |
+| `--session` | `-s` | Name for the timer (shown in notifications, used for session key) |
 | `--paused` | `-p` | Start timer in paused state |
+| `--sessions` | | List all sessions |
 
 ### Configuration File & Sessions
 
-Timer supports optional configuration via a JSON file located at `~/.config/go-timer/config.json`. This allows customization of display settings, timing intervals, and other parameters. Timer also persists sessions in `sessions.json` (auto-created), which can be restored with `--restore` / `-r` or via auto-restore when enabled.
+Timer supports optional configuration via a JSON file located at `~/.config/go-timer/config.json`. This allows customization of display settings, timing intervals, and other parameters. Timer also persists sessions in `~/.config/go-timer/sessions.json` (auto-created), which can be restored with `--restore` / `-r` or via auto-restore when enabled.
 
 #### Config File Format (Go-style durations, comments here for docs only)
 

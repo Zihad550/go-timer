@@ -71,7 +71,8 @@ func writeSession(session Session) {
 	if key == "" {
 		key = "default"
 	}
-	data, err := os.ReadFile("sessions.json")
+	sessionsPath := getSessionsPath()
+	data, err := os.ReadFile(sessionsPath)
 	if err != nil && !os.IsNotExist(err) {
 		return
 	}
@@ -84,7 +85,7 @@ func writeSession(session Session) {
 	if err != nil {
 		return
 	}
-	_ = os.WriteFile("sessions.json", out, 0644)
+	_ = os.WriteFile(sessionsPath, out, 0644)
 }
 
 func runTimer(duration time.Duration, useFullscreen bool, initialPaused bool, name string, initialElapsed time.Duration, summaryCh chan<- TimerSummary) error {

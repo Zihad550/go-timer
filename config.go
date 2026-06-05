@@ -34,7 +34,7 @@ var (
 	defaultTermHeight = 24
 
 	// Auto-restore from last session
-	restoreEnabled = false
+	restoreEnabled = true
 )
 
 // Config represents the configuration structure for config.json
@@ -49,7 +49,7 @@ type Config struct {
 	KeyBufferSize      int           `json:"keyBufferSize"`
 	DefaultTermWidth   int           `json:"defaultTermWidth"`
 	DefaultTermHeight  int           `json:"defaultTermHeight"`
-	Restore            bool          `json:"restore"`
+	Restore            *bool         `json:"restore"`
 }
 
 // loadConfig loads configuration from ~/.config/go-timer/config.json
@@ -110,7 +110,7 @@ func loadConfig() {
 	if config.DefaultTermHeight > 0 && config.DefaultTermHeight <= 1000 {
 		defaultTermHeight = config.DefaultTermHeight
 	}
-	if config.Restore {
-		restoreEnabled = config.Restore
+	if config.Restore != nil {
+		restoreEnabled = *config.Restore
 	}
 }
