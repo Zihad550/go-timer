@@ -19,6 +19,7 @@ var (
 	timerNameS   = flag.String("s", "", "name for the timer (shorthand for -session)")
 	restoreMode  = flag.Bool("restore", false, "restore timer from sessions.json")
 	restoreModeS = flag.Bool("r", false, "restore timer from sessions.json (shorthand)")
+	resetMode    = flag.Bool("reset", false, "start fresh, ignoring saved sessions (overrides -restore)")
 	uiMode       = flag.Bool("ui", false, "open UI for managing sessions")
 	uiModeS      = flag.Bool("u", false, "open UI for managing sessions (shorthand)")
 	showSessions = flag.Bool("sessions", false, "list all sessions")
@@ -46,6 +47,8 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "  timer --restore --session NAME    # restore session named NAME\n")
 	fmt.Fprintf(os.Stderr, "  timer --restore -s NAME             # restore session named NAME\n")
 	fmt.Fprintf(os.Stderr, "  timer --restore -i             # restore in inline mode regardless of saved setting\n")
+	fmt.Fprintf(os.Stderr, "  timer --reset                  # start a fresh stopwatch without restoring\n")
+	fmt.Fprintf(os.Stderr, "  timer --reset -s NAME 25m       # start a fresh named countdown\n")
 	fmt.Fprintf(os.Stderr, "  timer -sessions                # list all saved sessions\n")
 }
 
@@ -80,6 +83,8 @@ func main() {
 				*pausedMode = true
 			} else if arg == "-v" || arg == "-version" {
 				*showVersion = true
+			} else if arg == "-reset" || arg == "--reset" {
+				*resetMode = true
 			} else {
 				usage()
 				os.Exit(1)
@@ -124,7 +129,7 @@ func main() {
 	}
 
 	// Handle restore mode (manual or auto)
-	isRestore := *restoreMode || *restoreModeS
+	isRestore := (*restoreMode || *restoreModeS) && !*resetMode
 	var restoredSession Session
 	if isRestore {
 		var err error
@@ -133,7 +138,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
-	} else if duration == 0 && restoreEnabled {
+	} else if duration == 0 && restoreEnabled && !*resetMode {
 		// Auto-restore if no duration specified and config has restore=true;
 		// fall back to a fresh counter when there is no session to restore
 		if s, err := loadSession(*timerName); err == nil {

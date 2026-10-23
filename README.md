@@ -68,6 +68,12 @@ timer -s "Pomodoro Session" 25m
 
 # Display version
 timer -version
+
+# Start fresh instead of restoring a saved session
+timer --reset
+
+# Start a fresh named countdown
+timer --reset -s "Pomodoro Session" 25m
 ```
 
 ### Duration Format
@@ -84,6 +90,7 @@ timer -version
 | `--version` | `-v` | Display version information |
 | `--session` | `-s` | Name for the timer (shown in notifications, used for session key) |
 | `--paused` | `-p` | Start timer in paused state |
+| `--reset` | | Start fresh, ignoring saved sessions (overrides `--restore`) |
 | `--sessions` | | List all sessions |
 
 ### Configuration File & Sessions
@@ -131,6 +138,7 @@ Timer supports optional configuration via a JSON file located at `~/.config/go-t
 - Config values outside acceptable ranges are ignored to prevent performance issues
 - When `restore` is true and no duration is provided (and `--restore` not disabled), timer automatically restores the last session with its original display mode (inline or fullscreen)
 - Command-line flags take precedence over restored session settings, allowing users to override saved behavior when restoring
+- `--reset` skips both automatic and explicit restore. It starts a fresh stopwatch, or a fresh countdown when a duration is supplied, using the selected session name. The new timer saves to that session as usual; other sessions are preserved.
 
 ## ⌨️ Keyboard Controls & Notifications
 
