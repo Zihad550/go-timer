@@ -32,6 +32,17 @@ curl -sL https://github.com/Zihad550/go-timer/releases/latest/download/go-timer_
 install -Dm755 go-timer ~/.local/bin/go-timer
 ```
 
+### Updating
+
+```bash
+go-timer --update
+# -update also works
+```
+
+The updater installs the latest GitHub release for your OS and architecture after verifying its SHA-256 checksum against the release's `checksums.txt`. It replaces the installed binary atomically and preserves its permissions. If the installed version already matches the release, it skips the download. Sessions and configuration are preserved.
+
+The installation directory must be writable by your user. Releases currently provide Linux amd64 binaries; other platforms receive an error when no matching asset exists. Older versions without `--update` need to be updated once using the prebuilt binary instructions above.
+
 ### Build from Source
 
 ```bash
@@ -88,6 +99,7 @@ timer --reset -s "Pomodoro Session" 25m
 |------|-----------|-------------|
 | `--inline` | `-i` | Run in inline mode (disable fullscreen TUI) |
 | `--version` | `-v` | Display version information |
+| `--update` | | Update to the latest GitHub release (`-update` also works) |
 | `--session` | `-s` | Name for the timer (shown in notifications, used for session key) |
 | `--paused` | `-p` | Start timer in paused state |
 | `--reset` | | Start fresh, ignoring saved sessions (overrides `--restore`) |

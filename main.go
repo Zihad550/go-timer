@@ -23,6 +23,7 @@ var (
 	uiMode       = flag.Bool("ui", false, "open UI for managing sessions")
 	uiModeS      = flag.Bool("u", false, "open UI for managing sessions (shorthand)")
 	showSessions = flag.Bool("sessions", false, "list all sessions")
+	updateMode   = flag.Bool("update", false, "update to the latest GitHub release")
 )
 
 func usage() {
@@ -50,11 +51,20 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "  timer --reset                  # start a fresh stopwatch without restoring\n")
 	fmt.Fprintf(os.Stderr, "  timer --reset -s NAME 25m       # start a fresh named countdown\n")
 	fmt.Fprintf(os.Stderr, "  timer -sessions                # list all saved sessions\n")
+	fmt.Fprintf(os.Stderr, "  timer --update                 # install the latest GitHub release\n")
 }
 
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+
+	if *updateMode {
+		if err := updateApp(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	// Merge short/long flags for session name
 	if *timerNameS != "" {
