@@ -125,12 +125,7 @@ func main() {
 
 	// Handle restore mode (manual or auto)
 	isRestore := *restoreMode || *restoreModeS
-	if duration == 0 && restoreEnabled && !isRestore {
-		// Auto-restore if no duration specified and config has restore=true
-		isRestore = true
-	}
 	var restoredSession Session
-	var initialElapsed time.Duration
 	if isRestore {
 		var err error
 		restoredSession, err = loadSession(*timerName)
@@ -138,6 +133,16 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
+	} else if duration == 0 && restoreEnabled {
+		// Auto-restore if no duration specified and config has restore=true;
+		// fall back to a fresh counter when there is no session to restore
+		if s, err := loadSession(*timerName); err == nil {
+			restoredSession = s
+			isRestore = true
+		}
+	}
+	var initialElapsed time.Duration
+	if isRestore {
 		// Override parameters from session
 		if restoredSession.Mode == "counter" {
 			duration = 0

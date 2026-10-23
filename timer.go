@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"syscall"
 	"time"
@@ -85,6 +86,7 @@ func writeSession(session Session) {
 	if err != nil {
 		return
 	}
+	_ = os.MkdirAll(filepath.Dir(sessionsPath), 0755)
 	_ = os.WriteFile(sessionsPath, out, 0644)
 }
 
