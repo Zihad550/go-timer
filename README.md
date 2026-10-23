@@ -25,6 +25,13 @@ go install github.com/Zihad550/go-timer@v0.1.0
 go install github.com/Zihad550/go-timer@latest
 ```
 
+### Prebuilt Binary (Linux amd64, no Go required)
+
+```bash
+curl -sL https://github.com/Zihad550/go-timer/releases/latest/download/go-timer_linux_amd64.tar.gz | tar xz go-timer
+install -Dm755 go-timer ~/.local/bin/go-timer
+```
+
 ### Build from Source
 
 ```bash

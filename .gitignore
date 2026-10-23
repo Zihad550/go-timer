@@ -2,3 +2,5 @@ timer
 timer.exe
 sessions.json
 build
+dist
+/go-timer

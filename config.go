@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-const version = "dev"
+// version is set at build time via -ldflags "-X main.version=..."
+var version = "dev"
 
 // Configuration variables (defaults)
 var (
